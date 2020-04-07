@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import yaml
 
-from preprocess import preprocess, preprocess_lm
+from utils.preprocess import preprocess, preprocess_lm
 
 from sklearn.preprocessing import StandardScaler
 
@@ -86,7 +86,7 @@ params['nfolds'] = 5
 
 params
 
-yaml.dump(params, open('models/lm_01.yaml', 'w'), indent=0)
+yaml.dump(params, open('model_params/lm_01.yaml', 'w'), indent=0)
 
 lm_final = H2OGeneralizedLinearEstimator(**params)
 

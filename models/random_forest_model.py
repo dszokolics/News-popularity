@@ -2,9 +2,8 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pickle
 
-from preprocess import preprocess
+from utils.preprocess import preprocess
 from sklearn.preprocessing import StandardScaler
 
 from sklearn.decomposition import PCA
@@ -18,6 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
 from hyperopt import hp, fmin, tpe, space_eval, Trials, STATUS_OK
+import yaml
 
 
 train, valid, y_var, X_vars, test, _ = preprocess(test_set=True, test_size=0.5, pca=True)
@@ -64,7 +64,7 @@ cross_validate(rfc_final, train[X_vars], train[y_var], scoring='roc_auc', return
 rfc_final.fit(train[X_vars], train[y_var])
 roc_auc_score(valid[y_var], [x[1] for x in rfc_final.predict_proba(valid[X_vars])])
 
-pickle.dump(params, open('models/rfc_01_p.pckl', 'wb'))
+yaml.dump(params, open('models/rfc_01_p.yaml', 'w'), indent=0)
 
 # test['score'] = [x[1] for x in rfc_final.predict_proba(test[X_vars])]
 #

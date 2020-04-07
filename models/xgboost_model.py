@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-from preprocess import preprocess
-import pickle
+import yaml
+from utils.preprocess import preprocess
 
 from sklearn.preprocessing import StandardScaler
 
@@ -71,6 +71,4 @@ xgb_fin0.fit(train[X_vars], train[y_var], **fit_params)
 
 roc_auc_score(_[y_var], [x[1] for x in xgb_fin0.predict_proba(_[X_vars])])
 
-pickle.dump(params, open('models/xgb_01_p.pckl', 'wb'))
-#
-# xgb = pickle.load(open('models/xgb_01.pckl', 'rb'))
+yaml.dump(params, open('models/xgb_01_p.yaml', 'w'), indent=0)

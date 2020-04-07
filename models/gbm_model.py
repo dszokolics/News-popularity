@@ -1,8 +1,8 @@
-from preprocess import preprocess
+from utils.preprocess import preprocess
 
 import pandas as pd
 import numpy as np
-import pickle
+import yaml
 
 from hyperopt import hp, fmin, tpe, space_eval, Trials, STATUS_OK
 from h2o.estimators.gbm import H2OGradientBoostingEstimator
@@ -84,7 +84,7 @@ _['pred'] = res.p1.values
 
 roc_auc_score(_[y_var], _['pred'])
 
-pickle.dump(params, open('models/gbm_01_p.pckl', 'wb'))
+yaml.dump(params, open('model_params/gbm_01_p.yaml', 'w'))
 
 # test_h2o = h2o.H2OFrame(test)
 # res = gbm_final.predict(test_h2o)

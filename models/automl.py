@@ -6,12 +6,12 @@ from h2o.automl import H2OAutoML, get_leaderboard
 import xgboost
 
 
+### Quick auto ML for baseline
+
 train = pd.read_csv('data/train.csv')
-train.shape
 train.set_index('article_id', inplace=True)
 
 test = pd.read_csv('data/test.csv')
-test.shape
 test.set_index('article_id', inplace=True)
 
 y_var = 'is_popular'

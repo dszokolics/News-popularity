@@ -11,7 +11,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-from preprocess import preprocess, preprocess_lm
+from utils.preprocess import preprocess, preprocess_lm
 import pandas as pd
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import roc_auc_score
@@ -35,21 +35,21 @@ def load(file):
     return yaml.load(open(file, 'r'), Loader=yaml.FullLoader)
 
 
-rfc_final = RandomForestClassifier(**load('models/rfc_01.yaml'))
-rfc_final_p = RandomForestClassifier(**load('models/rfc_01_p.yaml'))
+rfc_final = RandomForestClassifier(**load('model_params/rfc_01.yaml'))
+rfc_final_p = RandomForestClassifier(**load('model_params/rfc_01_p.yaml'))
 
-xgb_final = XGBClassifier(**load('models/xgb_01.yaml'))
-xgb_final_p = XGBClassifier(**load('models/xgb_01_p.yaml'))
+xgb_final = XGBClassifier(**load('model_params/xgb_01.yaml'))
+xgb_final_p = XGBClassifier(**load('model_params/xgb_01_p.yaml'))
 
-dl_final = H2ODeepLearningEstimator(**load('models/dl_01.yaml'))
-dl_final_p = H2ODeepLearningEstimator(**load('models/dl_01_p.yaml'))
-dl_final_p2 = H2ODeepLearningEstimator(**load('models/dl_02_p.yaml'))
+dl_final = H2ODeepLearningEstimator(**load('model_params/dl_01.yaml'))
+dl_final_p = H2ODeepLearningEstimator(**load('model_params/dl_01_p.yaml'))
+dl_final_p2 = H2ODeepLearningEstimator(**load('model_params/dl_02_p.yaml'))
 
-gbm_final = H2OGradientBoostingEstimator(**load('models/gbm_02.yaml'))
-gbm_final_p = H2OGradientBoostingEstimator(**load('models/gbm_01_p.yaml'))
-gbm_final2 = H2OGradientBoostingEstimator(**load('models/gbm_01.yaml'))
+gbm_final = H2OGradientBoostingEstimator(**load('model_params/gbm_02.yaml'))
+gbm_final_p = H2OGradientBoostingEstimator(**load('model_params/gbm_01_p.yaml'))
+gbm_final2 = H2OGradientBoostingEstimator(**load('model_params/gbm_01.yaml'))
 
-lm_final = H2OGeneralizedLinearEstimator(**load('models/lm_01.yaml'))
+lm_final = H2OGeneralizedLinearEstimator(**load('model_params/lm_01.yaml'))
 
 sklearn_estimators = {'rfc': rfc_final, 'rfc_p': rfc_final_p, 'xgb': xgb_final, 'xgb_p': xgb_final_p}
 h2o_estimators = {'dl': dl_final, 'dl_p': dl_final_p, 'dl_p2': dl_final_p2, 'gbm': gbm_final, 'gbm2': gbm_final2, 'gbm_p': gbm_final_p}
@@ -139,19 +139,6 @@ def base_scores(df, pred_cols):
         print(f'{col}: {roc_auc_score(df[y_var], df[col])}')
 
 base_scores(train, pred_cols)
-
-# train2 = train[[y_var] + pred_cols].copy()
-#
-# scaler = StandardScaler()
-# train2.loc[:, pred_cols] = scaler.fit_transform(train2[pred_cols])
-#
-# pca = PCA(len(pred_cols))
-# train2.loc[:, pred_cols] = pca.fit_transform(train2[pred_cols])
-#
-# scaler2 = StandardScaler()
-# train2.loc[:, pred_cols] = scaler2.fit_transform(train2[pred_cols])
-
-# penalty='l2', C=0.22
 
 pred_cols = [x for x in pred_cols if x not in {'lm_pred'}]  #, 'rfc_p_pred', 'gbm_pred'}]
 
