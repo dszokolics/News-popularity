@@ -1,0 +1,8 @@
+criterion: entropy
+max_depth: 13
+max_features: sqrt
+max_samples: 0.82
+min_impurity_decrease: 1.0e-07
+min_samples_split: 22
+n_estimators: 400
+random_state: 12

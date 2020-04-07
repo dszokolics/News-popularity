@@ -1,0 +1,7 @@
+Lambda: 0.062
+alpha: 0.36
+early_stopping: true
+family: binomial
+keep_cross_validation_predictions: true
+nfolds: 5
+seed: 1

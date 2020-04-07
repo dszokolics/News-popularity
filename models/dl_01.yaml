@@ -1,0 +1,18 @@
+activation: rectifierwithdropout
+epochs: 7
+hidden:
+- 30
+- 10
+hidden_dropout_ratios:
+- 0
+- 0.1
+input_dropout_ratio: 0.09
+keep_cross_validation_predictions: true
+l1: 2.2e-05
+l2: 0.006
+nfolds: 5
+rate_decay: 0.99
+seed: 1
+stopping_metric: logloss
+stopping_rounds: 4
+stopping_tolerance: 1.0e-05

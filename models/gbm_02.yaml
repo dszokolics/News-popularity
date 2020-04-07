@@ -1,0 +1,15 @@
+col_sample_rate: 0.92
+distribution: multinomial
+keep_cross_validation_predictions: true
+learn_rate: 0.07
+max_depth: 3
+min_rows: 17
+min_split_improvement: 0.0001
+nbins: 38
+nfolds: 5
+ntrees: 93
+sample_rate: 0.92
+seed: 2
+stopping_metric: AUC
+stopping_rounds: 4
+stopping_tolerance: 1.0e-05

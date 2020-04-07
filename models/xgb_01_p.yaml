@@ -1,0 +1,10 @@
+colsample_bytree: 0.46
+eta: 0.13
+gamma: 0.76
+max_depth: 6
+n_estimators: 500
+objective: binary:logistic
+reg_alpha: 8.0
+reg_lambda: 2.1
+seed: 21
+subsample: 0.94
