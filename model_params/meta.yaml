@@ -1,0 +1,5 @@
+Lambda: 0.009
+alpha: 0.84
+early_stopping: true
+family: gaussian
+seed: 1
