@@ -1,10 +1,10 @@
 # News-popularity
 
-This repo contains the models I built for predicting news popularity. The repo's structure is the following:
+This repo contains the models I built for predicting news popularity (https://www.kaggle.com/c/ceuba2020). The repo's structure is the following:
 
 - data/: contains the input data
 
-- EDA/: it holds the HTML output of the profiling
+- EDA/: it holds the HTML output of the explaratory profiling
 
 - model_params/: contains the best hyperparams for the models used for the ensemble
 
@@ -60,9 +60,11 @@ I trained multiple models to find the best performant one. At last, it turned ou
 
 I trained two GBMs on the non-PCA dataset, and two DL on the PCA dataset, that's why they have three final models. I was focusing on The tree-based models, hence for simplicity, I chose H2O over Keras as a library for deep learning.
 
-I used hyperopt for finding the best parameters for the models (scripts in the model directory). After the training, I exported the dictionary of the best parameters to the model_params folder as yaml files.
+I used hyperopt for finding the best parameters for the models (scripts in the model directory). This module uses an algorithm called Tree-structured Parzen Estimator Approach, which is more efficient in finding the best parameters than grid search or random search. For the training, I had to define the parameter space, where the search is conducted. After the training I checked if the parameters are not at the edge of the parameter space, and also checked the cross validation (within the train set) and out of sample performance. I exported the dictionary of the best parameters to the model_params folder as yaml files.
 
-Although the final evaluation is based on the AUC metric, I used logloss for hyperparameter search (and for early stopping where applicable). For me, it seemed a more stable metric than AUC, so I made this choice to reduce overfitting.
+I have used three datasets for training: train, validation and the holdout set. I used the validation set for early stopping, and for evaluating model performance during the hyperparameter optimization. After finding the best parameters, I checked the model performance on the test set, and if it wasn't far from the validation performance, I accepted the model.
+
+Although the final evaluation is based on the AUC metric, I used logloss for hyperparameter search (and for early stopping where applicable). This metric seemed more stable than AUC, so I expected that it will reduce overfitting.
 
 Exact performances will be reported in the next section.
 
@@ -70,9 +72,17 @@ Exact performances will be reported in the next section.
 
 I optimized two parameters of GLM: lambda for the regularization strength, and alpha for the distribution between L1 and L2. I used the dataset prepared for the linear case. In order to save time and avoid overfitting, I applied early stopping.
 
+Performance of the holdout set (ROC): 0.672
+
 #### Random Forest
 
 The three main parameters I used for optimization are the maximum depth, the minimum samples required for split and the sample size. The two resulting parameter sets are quite similar, and later it turned out, that their results are highly correlated, so I dropped one of them during the meta-learner training.
+
+Performance of the holdout set (ROC):
+
+- With PCA: 0.708
+
+- Without PCA: 0.708
 
 #### Gradient Boosting Machine
 
@@ -80,8 +90,33 @@ I managed to train three GBMs with quite different hyperparameter sets, and reas
 
 The best performing GBM had a learn rate of 0.01, a sample rate of 0.49, a column sample rate of 0.66 and 7 as the maximum depth. This combination is interesting, because it produces many trees, but they are quite large and quite uncorrelated. The performance of the GBM models on the validation and holdout set is between 0.70 and 0.72, and 0.70 on the public Kaggle test set.
 
+Performance of the holdout set (ROC):
+
+- With PCA: 0.710
+
+- Without PCA (learning rate of 0.3): 0.711
+
+- Without PCA (learning rate of 0.03): 0.708
+
 #### XGBoost
 
 I expected the best performance from XGBoost, based on the autoML results. Actually I wasn't able to determine whether the H2O GLM or this had the better performance, because they are close, and their performances have significant variance (between .69 and .73).
 
+Performance of the holdout set (ROC):
+
+- With PCA: 0.707
+
+- Without PCA: 0.708
+
+#### Deep Learning
+
+I wasn't expecting a great performance from deep learning, as the dataset is not that large, and the automl showed superior performance for the tree-based methods.
+
+Performance of the holdout set (ROC):
+
+- With PCA (without rate decay): 0.690
+
+- With PCA (with rate decay): 0.683
+
+- Without PCA: 0.682
 
