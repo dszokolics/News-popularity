@@ -2,4 +2,6 @@ Lambda: 0.009
 alpha: 0.84
 early_stopping: true
 family: gaussian
+keep_cross_validation_predictions: true
+nfolds: 5
 seed: 1

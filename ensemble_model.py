@@ -186,12 +186,19 @@ params = clean_params(best)
 params['family'] = 'gaussian'
 params['early_stopping'] = True
 params['seed'] = 1
+params['keep_cross_validation_predictions'] = True
+params['nfolds'] = 5
 
 yaml.dump(params, open('model_params/meta.yaml', 'w'), indent=0)
 
 # Create & train meta learner model with the best parameters
 meta = H2OGeneralizedLinearEstimator(**params)
 meta.train(x=pred_cols, y=y_var, training_frame=t_h2o, validation_frame=v_h2o)
+
+# Check cross validation performance
+res = meta.cross_validation_predictions()
+res = pd.concat([x.as_data_frame() for x in res], axis=1)
+roc_auc_score(t[y_var], res.sum(axis=1).values)
 
 # Check prediction performance on the holdout set
 _ = predict(_, _p, _lm, sklearn_estimators, h2o_estimators, meta, X_vars, X_vars_p, X_vars_lm, pred_cols)
