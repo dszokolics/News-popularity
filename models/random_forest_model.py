@@ -1,26 +1,21 @@
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
+import yaml
 
 from utils.preprocess import preprocess
-from sklearn.preprocessing import StandardScaler
+from utils.helpers import clean_params
 
-from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
-
-from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_validate
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
 from hyperopt import hp, fmin, tpe, space_eval, Trials, STATUS_OK
-import yaml
 
 
 train, valid, y_var, X_vars, test, _ = preprocess(test_set=True, test_size=0.5, pca=True)
+
+### Hyperparameter optimization
 
 def hyperopt_train_test(params):
     params['max_depth'] = int(params['max_depth'])
@@ -48,7 +43,9 @@ best = fmin(f, space, algo=tpe.suggest, max_evals=20, trials=trials)
 
 best
 
-params = best.copy()
+### Test & save params
+
+params = clean_params(best)
 params['n_estimators'] = 400
 params['max_features'] = ['sqrt', 'log2'][params['max_features']]
 params['min_impurity_decrease'] = 1e-7

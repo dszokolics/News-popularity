@@ -1,8 +1,9 @@
-from utils.preprocess import preprocess
-
 import pandas as pd
 import numpy as np
 import yaml
+
+from utils.preprocess import preprocess
+from utils.helpers import clean_params
 
 from hyperopt import hp, fmin, tpe, space_eval, Trials, STATUS_OK
 from h2o.estimators.deeplearning import H2ODeepLearningEstimator
@@ -46,8 +47,7 @@ space = {
                                                                 [0.2, 0], [0.2, 0.1], [0.2, 0.2], [0.2, 0.3], [0.2, 0.4],
                                                                 [0.3, 0], [0.3, 0.1], [0.3, 0.2], [0.3, 0.3], [0.3, 0.4],
                                                                 [0.4, 0], [0.4, 0.1], [0.4, 0.2]]),
-    # 'hidden': hp.choice('hidden', [[10]*x for x in range(1, 6)]),
-    'epochs': hp.choice('epochs', range(6, 20)),
+    'epochs': hp.quniform('epochs', 6, 20, 1),
     'input_dropout_ratio': hp.quniform('input_dropout_ratio', 0, 0.7, 0.01),
     'stopping_rounds': 4,
     'stopping_metric': 'logloss',
@@ -60,25 +60,22 @@ def f(params):
     return {'loss': acc, 'status': STATUS_OK}
 
 trials = Trials()
-best = fmin(f, space, algo=tpe.suggest, max_evals=20, trials=trials)
+best = fmin(f, space, algo=tpe.suggest, max_evals=25, trials=trials)
 
 best
 
-for key, val in best.items():
-     if isinstance(best[key], np.int32):
-         best[key] = int(val)
+### Test & save params
 
-params = best.copy()
+params = clean_params(best)
+params['epochs'] = int(params['epochs'])
 params['hidden'] = [[10, 10], [10, 20], [10, 30], [10, 50],
                    [20, 10], [20, 20], [20, 30], [20, 50],
-                   [30, 10], [30, 20],
-                   [50, 10], [50, 20]][params['hidden']]
+                   [30, 10], [30, 20], [50, 10], [50, 20]][params['hidden']]
 params['hidden_dropout_ratios'] = [[0, 0], [0, 0.1], [0, 0.2], [0, 0.3], [0, 0.4],
                                 [0.1, 0], [0.1, 0.1], [0.1, 0.2], [0.1, 0.3], [0.1, 0.4],
                                 [0.2, 0], [0.2, 0.1], [0.2, 0.2], [0.2, 0.3], [0.2, 0.4],
                                 [0.3, 0], [0.3, 0.1], [0.3, 0.2], [0.3, 0.3], [0.3, 0.4],
                                 [0.4, 0], [0.4, 0.1], [0.4, 0.2]][params['hidden_dropout_ratios']]
-params['epochs'] += 5
 params['stopping_rounds'] = 4
 params['stopping_metric'] = 'logloss'
 params['stopping_tolerance'] = 1e-5
@@ -95,5 +92,7 @@ res = res.as_data_frame()
 _['pred'] = res.p1.values
 
 roc_auc_score(_[y_var], _['pred'])
+
+params
 
 yaml.dump(params, open('model_params/dl_01_p.yaml', 'w'), indent=0)

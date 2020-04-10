@@ -1,25 +1,21 @@
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 import yaml
+
 from utils.preprocess import preprocess
+from utils.helpers import clean_params
 
-from sklearn.preprocessing import StandardScaler
-
-from sklearn.decomposition import PCA
 from xgboost import XGBClassifier
 
-from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_validate
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 
 from hyperopt import hp, fmin, tpe, space_eval, Trials, STATUS_OK
 
 
 train, valid, y_var, X_vars, test, _ = preprocess(test_set=True, test_size=0.2, pca=True)
+
+### Hyperparameter optimization
 
 def hyperopt_train_test(params):
     params['max_depth'] = int(params['max_depth'])
@@ -50,17 +46,15 @@ best = fmin(f, space, algo=tpe.suggest, max_evals=30, trials=trials)
 
 best
 
-params = best.copy()
+### Test & save params
+
+params = clean_params(best)
 params['max_depth'] = int(params['max_depth'])
 params['n_estimators'] = 500
 params['objective'] = 'binary:logistic'
 params['seed'] = 21
 
-xgb_fin0 = XGBClassifier(**best)
-xgb_fin0.max_depth = xgb_fin0.max_depth + 1
-xgb_fin0.n_estimators = 500
-xgb_fin0.objective = 'binary:logistic'
-xgb_fin0.seed = 21
+xgb_fin0 = XGBClassifier(**params)
 
 fit_params = {'early_stopping_rounds': 8, 'eval_metric': 'logloss',
               'eval_set': [(valid[X_vars], valid[y_var])]}
