@@ -120,3 +120,12 @@ Performance of the holdout set (ROC):
 
 - Without PCA: 0.682
 
+### Meta learner
+
+I tried multiple models as meta learner, but I ended up using a penalized linear regression. As the inputs are already probabilities, it is plausible to expect linear relationship with the outcome probabilities. Also, the evaluation metric is ROC, which doesn't take exact values into account, only relative values. In this sense, the link function of the GLM doesn't really matter.
+
+I used the out-of-sample results from the cross validation for features. Altogether I had 11 base learners. The parameters of the final meta learner is in the meta.yaml. I haven't normalized my values before the regression, because they were already really close to eachother in terms of mean and standard deviation.
+
+I also tried to use the first component of the PCA based on the base learner predictions supposing that it's the most conservative approach, and I saw that my model overfits a bit. Actually it had a nice performance, but still worse than the linear regression.
+
+During the training I was focusing on my local cross validation and holdout set performances instead of the Kaggle public leaderboard. As I experienced, the results on Kaggle were around 1% below my cross validated average, and it was usually below the holdout set performance. In the end, I tried multiple seeds for the initial train/test split, and I ended up with results which were similar to my cross validated results, so I concluded that my model doesn't overfit.
