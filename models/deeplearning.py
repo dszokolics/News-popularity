@@ -47,7 +47,7 @@ space = {
                                                                 [0.2, 0], [0.2, 0.1], [0.2, 0.2], [0.2, 0.3], [0.2, 0.4],
                                                                 [0.3, 0], [0.3, 0.1], [0.3, 0.2], [0.3, 0.3], [0.3, 0.4],
                                                                 [0.4, 0], [0.4, 0.1], [0.4, 0.2]]),
-    'epochs': hp.quniform('epochs', 6, 20, 1),
+    'epochs': 25,
     'input_dropout_ratio': hp.quniform('input_dropout_ratio', 0, 0.7, 0.01),
     'stopping_rounds': 4,
     'stopping_metric': 'logloss',
@@ -67,7 +67,7 @@ best
 ### Test & save params
 
 params = clean_params(best)
-params['epochs'] = int(params['epochs'])
+params['epochs'] = 25
 params['hidden'] = [[10, 10], [10, 20], [10, 30], [10, 50],
                    [20, 10], [20, 20], [20, 30], [20, 50],
                    [30, 10], [30, 20], [50, 10], [50, 20]][params['hidden']]
