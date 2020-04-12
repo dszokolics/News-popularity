@@ -32,7 +32,7 @@ I did three types of data preparation.
 
 - Cleaning and PCA (utils/preprocess.py/preprocess with pca=True): In addition to the steps in the previous case, I grouped highly correlated variables. I identified groups which are highly correlated, dropped them, and used their PCAs instead.
 
-- Preparation for linear models (utils/preprocess.py/preprocess_lm): In this setup, I dropped some other columns because of linear dependency. Also, I created additional features, such as the square and log of all the continous variables. Also, I added some interactions with the most important features.
+- Preparation for linear models (utils/preprocess.py/preprocess_lm): In this setup, I dropped some other columns because of linear dependency. Also, I created additional features, such as the square and log of all the continous variables, and I added some interactions with the most important features. All the variables are normalized.
 
 The preparation process involves the splitting of the data into train, test and validation sets. I did the split prior to the cleaning, and did the same cleaning steps on all of them. Each step was executed based on the train data.
 
@@ -60,11 +60,11 @@ I trained multiple models to find the best performant one. At last, it turned ou
 
 I trained two GBMs on the non-PCA dataset, and two DL on the PCA dataset, that's why they have three final models. I was focusing on The tree-based models, hence for simplicity, I chose H2O over Keras as a library for deep learning.
 
-I used hyperopt for finding the best parameters for the models (scripts in the model directory). This module uses an algorithm called Tree-structured Parzen Estimator Approach, which is more efficient in finding the best parameters than grid search or random search. For the training, I had to define the parameter space, where the search is conducted. After the training I checked if the parameters are not at the edge of the parameter space, and also checked the cross validation (within the train set) and out of sample performance. I exported the dictionary of the best parameters to the model_params folder as yaml files.
+I used hyperopt to find the best hyperparameters for the models (scripts in the model directory). This module uses an algorithm called Tree-structured Parzen Estimator Approach, which is more efficient in finding the best parameters than grid search or random search. For the training, I had to define the parameter space, where the search is conducted. After the training I checked if the parameters are not at the edge of the parameter space, and also checked the cross validation (within the train set) and out of sample performance. I exported the dictionary of the best parameters to the model_params folder as yaml files.
 
-I have used three datasets for training: train, validation and the holdout set. I used the validation set for early stopping, and for evaluating model performance during the hyperparameter optimization. After finding the best parameters, I checked the model performance on the test set, and if it wasn't far from the validation performance, I accepted the model.
+I used three datasets for training: train, validation and the holdout set. The validation set was used for early stopping, and evaluating model performance during the hyperparameter optimization. After finding the best parameters, I checked the model performance on the test set and on the train set with cross validation, and if it wasn't far from the validation performance, I accepted the model. Actually, using cross-validation performance either for early stopping or hyperparameter optimization could be more beneficial, but also much slower. In my setup, I think I slightly overfitted the validation set.
 
-Although the final evaluation is based on the AUC metric, I used logloss for hyperparameter search (and for early stopping where applicable). This metric seemed more stable than AUC, so I expected that it will reduce overfitting.
+Although the final evaluation is based on the AUC metric, I used logloss for hyperparameter search (and for early stopping where applicable). This metric seemed less noisy than AUC, so I expected that it will reduce overfitting.
 
 Exact performances will be reported in the next section.
 
@@ -76,7 +76,9 @@ Performance of the holdout set (ROC): 0.672
 
 #### Random Forest
 
-The three main parameters I used for optimization are the maximum depth, the minimum samples required for split and the sample size. The two resulting parameter sets are quite similar, and later it turned out, that their results are highly correlated, so I dropped one of them during the meta-learner training.
+The three main parameters I used for optimization are the maximum depth, the minimum samples required for split and the sample size. The two resulting parameter sets are quite similar, and later it turned out, that their results are highly correlated. Although I was sceptical about using both in the same ensemle, it performed worse if I dropped one of them.
+
+I tried recursive feature elimination as a preparatory step for this model, but it didn't help, so I kept all my features.
 
 Performance of the holdout set (ROC):
 
@@ -86,9 +88,9 @@ Performance of the holdout set (ROC):
 
 #### Gradient Boosting Machine
 
-I managed to train three GBMs with quite different hyperparameter sets, and reasonable performance, so I kept all of them. I used early stopping for training (4-8 rounds and 10^{-5}-10^{-6} stopping tolerance). I started using the number of trees as a hyperparameter, but later on I realized, that it's doesn't make sense with early stopping, so I set it to 500.
+I managed to train three GBMs with different hyperparameter sets, and reasonable performance, so I kept all of them. I used early stopping for training (4-8 rounds and 10^{-5}-10^{-6} stopping tolerance). I started using the number of trees as a hyperparameter, but later on I realized, that it's doesn't make sense with early stopping, so I set it to 500. One of my models was trained before this change, so it has a limited number of trees along with higher learning rate.
 
-The best performing GBM had a learn rate of 0.01, a sample rate of 0.49, a column sample rate of 0.66 and 7 as the maximum depth. This combination is interesting, because it produces many trees, but they are quite large and quite uncorrelated. The performance of the GBM models on the validation and holdout set is between 0.70 and 0.72, and 0.70 on the public Kaggle test set.
+It is interesting to see the tradeoffs between the different parameters in the three models. The max_depth and the min_rows (minimum samples needed before splitting) clearly moves together, as they control for the complexity of one tree. Also, the sample rate and the column sample rate seems to correlate negatively, which is also intuitive, as they are both aiming at decorrelating the trees.
 
 Performance of the holdout set (ROC):
 
@@ -102,6 +104,8 @@ Performance of the holdout set (ROC):
 
 I expected the best performance from XGBoost, based on the autoML results. Actually I wasn't able to determine whether the H2O GLM or this had the better performance, because they are close, and their performances have significant variance (between .69 and .73).
 
+I used the hyperparameter gamma (minimum loss reduction needed to split) instead of the minimum samples needed to split, and I added the two regularization parameters, alpha and lambda. The model which uses PCA for preprocessing uses higher max depth, and has higher alpha, lambda and gamma parameters. For me, it seems that the non-PCA model has a bit higher complexity based on these.
+
 Performance of the holdout set (ROC):
 
 - With PCA: 0.707
@@ -110,7 +114,7 @@ Performance of the holdout set (ROC):
 
 #### Deep Learning
 
-I wasn't expecting a great performance from deep learning, as the dataset is not that large, and the automl showed superior performance for the tree-based methods. After submitting my final results, I realized that I made the same mistake, as I did for the GBM: I used the number of epochs as a parameter for optimization, and I used early stopping as well. In the last uptade, I fixed the number of epochs at 25.
+I wasn't expecting a great performance from deep learning, as the dataset is not that large, and the automl showed superior performance for the tree-based methods. After submitting my final results, I realized that I made the same mistake, as I did for the GBM: I used the number of epochs as a parameter for optimization, and applied early stopping as well. In the last uptade, I fixed the number of epochs at 25.
 
 Performance of the holdout set (ROC):
 
