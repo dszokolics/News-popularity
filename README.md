@@ -110,7 +110,7 @@ Performance of the holdout set (ROC):
 
 #### Deep Learning
 
-I wasn't expecting a great performance from deep learning, as the dataset is not that large, and the automl showed superior performance for the tree-based methods.
+I wasn't expecting a great performance from deep learning, as the dataset is not that large, and the automl showed superior performance for the tree-based methods. After submitting my final results, I realized that I made the same mistake, as I did for the GBM: I used the number of epochs as a parameter for optimization, and I used early stopping as well. In the last uptade, I fixed the number of epochs at 25.
 
 Performance of the holdout set (ROC):
 
