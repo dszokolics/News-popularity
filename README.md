@@ -92,6 +92,8 @@ I managed to train three GBMs with different hyperparameter sets, and reasonable
 
 It is interesting to see the tradeoffs between the different parameters in the three models. The max_depth and the min_rows (minimum samples needed before splitting) clearly moves together, as they control for the complexity of one tree. Also, the sample rate and the column sample rate seems to correlate negatively, which is also intuitive, as they are both aiming at decorrelating the trees.
 
+![](https://github.com/dszokolics/News-popularity/blob/master/gbm_params.png)
+
 Performance of the holdout set (ROC):
 
 - With PCA: 0.710
